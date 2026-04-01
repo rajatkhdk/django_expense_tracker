@@ -7,9 +7,9 @@
   <div class="row mb-3">
     <div class="col-12 d-flex justify-content-between align-items-center">
     <h1 class="m-0">Dashboard</h1>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-expense">
+        {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-expense">
             <i class="fas fa-plus"></i> Add New Expense
-        </button>
+        </button> {% endcomment %}
     </div>
   </div>
   <div class="row">
@@ -49,6 +49,11 @@
   <div class="card shadow">
     <div class="card-header border-0">
       <h3 class="card-title text-bold"> Recent Transactions</h3>
+      <div class="card-tools ml-auto">
+          <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-add-expense">
+            <i class="fas fa-plus"></i> Add New Expense
+          </button>
+        </div>
     </div>
     <div class="card-body table-responsive p-0">
       <table class="table table-hover table-valign-middle">
@@ -58,7 +63,7 @@
             <th>Category</th>
             <th>Amount</th>
             <th>Date</th>
-          <tr>
+          </tr>
         </thead>
         <tbody>
           {% for expense in recent_expenses %}
@@ -68,6 +73,12 @@
             <td class="text-bold text-success">${{ expense.amount }}</td>
             <td class="text-muted">{{ expense.date }}</td>
             <td>
+
+            <td class="text-right">
+      <a href="{% url 'edit_expense' expense.pk %}" class="btn btn-sm btn-outline-primary mr-1">
+        <i class="fas fa-pencil-alt"></i>
+      </a>
+
       <form action="{% url 'delete_expense' expense.pk %}" method="POST" style="display:inline;">
         {% csrf_token %}
         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
@@ -75,7 +86,7 @@
         </button>
       </form>
     </td>
-          </tr>
+   </tr>
           {% empty %}
           <tr>
             <td colspan="4" class="text-center">No expenses found. Add some in the Admin panel!</td>

@@ -51,3 +51,22 @@ def delete_expense(request, pk):
         expense.delete()
         return redirect('dashboard')
     return redirect('dashboard') # Safety redirect
+
+def edit_expense(request, pk):
+    # Get the specific expense or retuen a 404 error
+    expense = get_object_or_404(Expense, pk=pk)
+
+    if request.method == "POST":
+        # Fill the form with the new data from the user, but linked to the old instance
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        # Get request: Show the form pre-filled with existing data
+        form = ExpenseForm(instance=expense)
+
+    return render(request, 'expenses/edit_expense.html', {
+        'form': form,
+        'expense': expense
+    })
