@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Expense
 from django.db.models import Sum, Q
+from django.db.models.functions import ExtractMonth
 from .forms import ExpenseForm
 from django.utils import timezone
 from datetime import datetime
@@ -37,13 +38,43 @@ def dashboard(request):
     labels = [item['category__name'] for item in category_data]
     data = [float(item['total']) for item in category_data]
 
+    # DEBUG: Add these print statements
+    print(f"Labels: {labels}")
+    print(f"Data: {data}")
+
+    # Get monthly totals for the current year
+    current_year = timezone.now().year
+    monthly_stats = Expense.objects.filter(
+        user=request.user,
+        date__year=current_year
+    ).annotate(
+        month=ExtractMonth('date')
+    ).values('month').annotate(
+        total=Sum('amount')
+    ).order_by('month')
+
+    month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    # Prepare data for a Trend Line chart
+    yearly_amounts = [0] * 12
+    for stat in monthly_stats:
+        yearly_amounts[stat['month'] - 1] = float(stat['total'])
+
+    
+
+    # # Update the current month (April is index 3) with your real total
+    # yearly_amounts[3] = float(current_month_total)
+
     context = {
         'total_expenses': current_month_total, # this is now filtered
         'recent_expenses': recent_expenses,
         'form' : form,  # Send the form to the HTML
         'current_month_name': now.strftime('%B'), # Sends "April" to the UI
-        'labels': labels,   # List of names like ['Food', 'Rent']
+        'labels':labels,   # List of names like ['Food', 'Rent']
         'data': data,   # List of numbers like [50.00, 1200.00]
+        'yearly_amounts': yearly_amounts,
+        'month_names': month_names,
+        'current_year': current_year,
     }
 
     return render(request, 'expenses/dashboard.html', context)

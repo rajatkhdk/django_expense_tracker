@@ -44,7 +44,17 @@
         </div>
       </div>
     </div>
+  <div class="col-md-6">
+    <div class="card card-info shadow">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i>Spending Trend ({{ current_year }})</h3>
+      </div>
+      <div class="card-body">
+        <canvas id="lineChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+      </div>
+    </div>
   </div>
+</div>
 <div class="row mt-4">
   <div class="col-12">
 
@@ -130,15 +140,16 @@
 <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
 <script>
   $(function () {
-    var donutData = {
-      labels: {{ labels|safe }}, // Django list converted to JS array
+    // --- 1. PIE CHART ---
+    var pieData = {
+      labels: {{ labels|safe|default:'[]' }}, // Django list converted to JS array
       datasets: [
         {
-          data: {{ data|safe }},
+          data: {{ data|safe|default:'[]' }},
           backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
         }
       ]
-    }
+    };
 
     var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
     var pieOptions     = {
@@ -148,9 +159,37 @@
     
     new Chart(pieChartCanvas, {
       type: 'pie',
-      data: donutData,
+      data: pieData,
       options: pieOptions
-    })
-  })
+    });
+
+    // --- 2. Line Chart ---
+    var lineData = {
+      labels: {{  month_names | safe|default:'[]' }}, // ['Jan', 'Feb', etc.]
+      datasets: [{
+        label: 'Expenses',
+        backgroundColor: 'rgba(60,141,188,0.1)', // Light blue fill
+        borderColor: 'rgba(60,141,188,1)', // Darker blue line
+        pointRadius: 4,
+        pointBackgroundColor: '#3c8dbc',
+        data: {{ yearly_amounts | safe|default:'[]' }} // [0, 0, 0, 1500, ...]
+      }]
+    };
+
+    var lineChartCanvas = $('#lineChart').get(0).getContext('2d');
+    new Chart(lineChartCanvas, {
+      type: 'line',
+      data: lineData,
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: {
+          yAxes: [{
+            ticks: { beginAtZero: true, callback: function(value) { return '$' + value; } }
+          }]
+        }
+      }
+    });
+  });
 </script>
 {% endblock %}
