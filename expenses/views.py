@@ -1,13 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Expense
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from .forms import ExpenseForm
 from django.utils import timezone
 from datetime import datetime
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
+@login_required
 def dashboard(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST)
@@ -45,7 +44,8 @@ def dashboard(request):
     }
 
     return render(request, 'expenses/dashboard.html', context)
-
+    
+@login_required
 def delete_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == 'POST':
@@ -53,6 +53,7 @@ def delete_expense(request, pk):
         return redirect('dashboard')
     return redirect('dashboard') # Safety redirect
 
+@login_required
 def edit_expense(request, pk):
     # Get the specific expense or retuen a 404 error
     expense = get_object_or_404(Expense, pk=pk)
@@ -72,6 +73,7 @@ def edit_expense(request, pk):
         'expense': expense
     })
 
+@login_required
 def all_expenses(request):
     query = request.GET.get('search')
     if query:
