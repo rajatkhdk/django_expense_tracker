@@ -70,3 +70,13 @@ def edit_expense(request, pk):
         'form': form,
         'expense': expense
     })
+
+def all_expenses(request):
+    query = request.GET.get('search')
+    if query:
+      expenses = Expense.objects.filter(title__icontains=query).order_by('-date')
+
+    else:
+        expenses = Expense.objects.all().order_by('-date')
+
+    return render(request, 'expenses/all_expenses.html', {'expenses': expenses, 'query': query})

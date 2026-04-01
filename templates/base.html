@@ -21,11 +21,17 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column">
           <li class="nav-item">
-            <a href="/" class="nav-link">
-              <i class="nav-icon fas fa-chart-pie"></i>
+            <a href="{% url 'dashboard' %}" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>Dashboard</p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="{% url 'all_expenses' %}" class="nav-link">
+            <i class="nav-icon fas fa-list"></i>
+            <p>All Expenses</p>
+            </a>
+            </li>
         </ul>
       </nav>
     </div>
