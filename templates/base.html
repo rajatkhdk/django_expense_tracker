@@ -13,6 +13,19 @@
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+          <i class="fas fa-bars"></i>
+        </a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="{% url 'dashboard' %}" class="nav-link">Home</a>
+      </li>
+    </ul>
+  </nav>
+
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="/" class="brand-link">
       <span class="brand-text font-weight-light">Expense Tracker</span>
@@ -50,7 +63,6 @@
 
 <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
 <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
 <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
