@@ -5,6 +5,7 @@ from .forms import ExpenseForm
 from django.utils import timezone
 from datetime import datetime
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 # Create your views here.
 def dashboard(request):
@@ -74,7 +75,10 @@ def edit_expense(request, pk):
 def all_expenses(request):
     query = request.GET.get('search')
     if query:
-      expenses = Expense.objects.filter(title__icontains=query).order_by('-date')
+      expenses = Expense.objects.filter(
+            Q(title__icontains=query) | 
+            Q(category__name__icontains=query)
+            ).order_by('-date')
 
     else:
         expenses = Expense.objects.all().order_by('-date')

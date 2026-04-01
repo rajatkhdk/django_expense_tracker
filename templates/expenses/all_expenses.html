@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load humanize %}
+
 {% block content %}
 <div class="pt-3">
     <div class="card shadow">
@@ -31,7 +33,7 @@
                         <td>{{ expense.date }}</td>
                         <td>{{ expense.title }}</td>
                         <td><span class="badge badge-primary">{{ expense.category.name }}</span></td>
-                        <td class="text-bold">${{ expense.amount }}</td>
+                        <td class="text-bold">${{ expense.amount | intcomma }}</td>
                         <td>
                             <a href="{% url 'edit_expense' expense.pk %}" class="btn btn-xs btn-info"><i class="fas fa-edit"></i></a>
                         </td>
