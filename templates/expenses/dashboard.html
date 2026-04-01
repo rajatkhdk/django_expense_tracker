@@ -1,38 +1,58 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 <div class="pt-3">
   <div class="row mb-3">
-    <div class="col-12">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+    <h1 class="m-0">Dashboard</h1>
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-expense">
             <i class="fas fa-plus"></i> Add New Expense
         </button>
     </div>
   </div>
   <div class="row">
-    <div class="col-lg-3 col-6">
+    <div class="col-md-4">
       <div class="small-box bg-success">
         <div class="inner">
           <h3>${{ total_expenses }}</h3>
-          <p>Total Expenses</p>
+          <p>
+            <i class="fas fa-calendar-alt mr-1"></i>
+            Total Expenses in {{ current_month_name }} 
+          </p>
         </div>
+
         <div class="icon">
           <i class="fas fa-wallet"></i>
         </div>
+
         <a href="#" class="small-box-footer">
-                      More info <i class="fas fa-arrow-circle-right"></i>
+                      View Report <i class="fas fa-arrow-circle-right"></i>
                   </a>
+    </div>
+  </div>
+<div class="col-md-8">
+      <div class="card card-danger shadow">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> Spending by Category</h3>
+        </div>
+        <div class="card-body">
+          <canvas id="pieChart" style="min-height: 200px; height: 200px; max-height: 200px; max-width: 100%;"></canvas>
+        </div>
       </div>
     </div>
   </div>
+<div class="row mt-4">
+  <div class="col-12">
 
-  <div class="card mt-3">
-    <div class="card-header">
-      <h3 class="card-title"> Recent Transactions</h3>
+  <div class="card shadow">
+    <div class="card-header border-0">
+      <h3 class="card-title text-bold"> Recent Transactions</h3>
     </div>
-    <div class="card-body p-0">
-      <table class="table table-stripped">
-        <thead>
+    <div class="card-body table-responsive p-0">
+      <table class="table table-hover table-valign-middle">
+        <thead class="thead-light">
           <tr>
             <th>Title</th>
             <th>Category</th>
@@ -58,6 +78,8 @@
     </div>
   </div>
 </div>
+</div>
+</div>
 
 <div class="modal fade" id="modal-add-expense">
   <div class="modal-dialog">
@@ -81,4 +103,33 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+<script>
+  $(function () {
+    var donutData = {
+      labels: {{ labels|safe }}, // Django list converted to JS array
+      datasets: [
+        {
+          data: {{ data|safe }},
+          backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+        }
+      ]
+    }
+
+    var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
+    var pieOptions     = {
+      maintainAspectRatio : false,
+      responsive : true,
+    }
+    
+    new Chart(pieChartCanvas, {
+      type: 'pie',
+      data: donutData,
+      options: pieOptions
+    })
+  })
+</script>
 {% endblock %}

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from .models import Expense
 from django.db.models import Sum
 from .forms import ExpenseForm
+from django.utils import timezone
+from datetime import datetime
 
 # Create your views here.
 def dashboard(request):
@@ -13,16 +15,31 @@ def dashboard(request):
     else:
         form = ExpenseForm()
 
-    # Calculate the total of all expenses in the database
-    total_expenses = Expense.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+    now = timezone.now()
 
-    # Get the 5 most recent expenses to show in a table
+    # Calculate the total of thiss month only
+    current_month_total = Expense.objects.filter(
+        date__year=now.year,
+        date__month=now.month
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Get the 5 most recent expenses
     recent_expenses = Expense.objects.all().order_by('-date')[:5]
 
+    # Get the data for the Chart: Group by category name and sum the amounts
+    category_data = Expense.objects.values('category__name').annotate(total=Sum('amount')).order_by('-total')
+
+    # Extract labels and values for JavaScript
+    labels = [item['category__name'] for item in category_data]
+    data = [float(item['total']) for item in category_data]
+
     context = {
-        'total_expenses': total_expenses,
+        'total_expenses': current_month_total, # this is now filtered
         'recent_expenses': recent_expenses,
         'form' : form,  # Send the form to the HTML
+        'current_month_name': now.strftime('%B'), # Sends "April" to the UI
+        'labels': labels,   # List of names like ['Food', 'Rent']
+        'data': data,   # List of numbers like [50.00, 1200.00]
     }
 
     return render(request, 'expenses/dashboard.html', context)
