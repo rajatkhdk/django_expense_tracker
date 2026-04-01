@@ -11,7 +11,9 @@ def dashboard(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST)
         if form.is_valid():
-            form.save()
+            expense = form.save(commit=False)
+            expense.user = request.user # Attach the logged-in user
+            expense.save()
             return redirect('dashboard') # Refresh page to show new data
     else:
         form = ExpenseForm()
@@ -20,15 +22,16 @@ def dashboard(request):
 
     # Calculate the total of thiss month only
     current_month_total = Expense.objects.filter(
+        user=request.user,
         date__year=now.year,
         date__month=now.month
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
     # Get the 5 most recent expenses
-    recent_expenses = Expense.objects.all().order_by('-date')[:5]
+    recent_expenses = Expense.objects.filter(user=request.user).order_by('-date')[:5]
 
     # Get the data for the Chart: Group by category name and sum the amounts
-    category_data = Expense.objects.values('category__name').annotate(total=Sum('amount')).order_by('-total')
+    category_data = Expense.objects.filter(user=request.user).values('category__name').annotate(total=Sum('amount')).order_by('-total')
 
     # Extract labels and values for JavaScript
     labels = [item['category__name'] for item in category_data]
@@ -47,16 +50,15 @@ def dashboard(request):
     
 @login_required
 def delete_expense(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
     if request.method == 'POST':
         expense.delete()
-        return redirect('dashboard')
     return redirect('dashboard') # Safety redirect
 
 @login_required
 def edit_expense(request, pk):
     # Get the specific expense or retuen a 404 error
-    expense = get_object_or_404(Expense, pk=pk)
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
 
     if request.method == "POST":
         # Fill the form with the new data from the user, but linked to the old instance
@@ -76,13 +78,17 @@ def edit_expense(request, pk):
 @login_required
 def all_expenses(request):
     query = request.GET.get('search')
+
+    # Start with only the current user's expenses
+    user_expenses = Expense.objects.filter(user=request.user)
+
     if query:
-      expenses = Expense.objects.filter(
+      expenses = user_expenses.filter(
             Q(title__icontains=query) | 
             Q(category__name__icontains=query)
             ).order_by('-date')
 
     else:
-        expenses = Expense.objects.all().order_by('-date')
+        expenses = user_expenses.order_by('-date')
 
     return render(request, 'expenses/all_expenses.html', {'expenses': expenses, 'query': query})
