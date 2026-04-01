@@ -64,9 +64,17 @@
           {% for expense in recent_expenses %}
           <tr>
             <td>{{ expense.title }}</td>
-            <td>{{ expense.category.name }}</td>
-            <td>${{ expense.amount }}</td>
-            <td>{{ expense.date }}</td>
+            <td><span class="badge badge-info">{{ expense.category.name }}</span></td>
+            <td class="text-bold text-success">${{ expense.amount }}</td>
+            <td class="text-muted">{{ expense.date }}</td>
+            <td>
+      <form action="{% url 'delete_expense' expense.pk %}" method="POST" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
+          <i class="fas fa-trash"></i>
+        </button>
+      </form>
+    </td>
           </tr>
           {% empty %}
           <tr>

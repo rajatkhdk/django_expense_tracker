@@ -4,6 +4,7 @@ from django.db.models import Sum
 from .forms import ExpenseForm
 from django.utils import timezone
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 def dashboard(request):
@@ -43,3 +44,10 @@ def dashboard(request):
     }
 
     return render(request, 'expenses/dashboard.html', context)
+
+def delete_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.method == 'POST':
+        expense.delete()
+        return redirect('dashboard')
+    return redirect('dashboard') # Safety redirect
